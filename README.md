@@ -1,6 +1,6 @@
 # scMFC
 A deep single-cell multi-view fuzzy clustering framework
-![Franework](https://github.com/DayuHuu/scMFC/blob/master/scMFC_framework.png)
+![Franework](https://github.com/DayuHuu/scMFC/blob/master/scMFC_Framework.pdf)
 **Description:**
 
 scEGG is a deep clustering framework designed for single-cell analysis. It integrates cell and exogenous gene features simultaneously, aligning and fusing them during clustering to generate a more discriminative representation.
