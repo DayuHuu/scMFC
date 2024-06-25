@@ -1,6 +1,6 @@
 # scMFC
 A deep single-cell multi-view fuzzy clustering framework
-![Framework](https://github.com/DayuHuu/scMFC/blob/master/scMFC_Framework.pdf)
+![Framework](https://github.com/DayuHuu/scMFC/edit/master/scMFC_Framework.pdf)
 
 
 
@@ -26,9 +26,8 @@ This is some of source code for **scMFC: High-order Topology for Deep Single-cel
     parser = argparse.ArgumentParser(description='Train neural network models on specified dataset.')
     parser.add_argument('--dataset', default='BMNC',type=str, required=False, help='Dataset to use, default is BMNC.')
     parser.add_argument('--batch_size', default=2048, type=int, help='Batch size for training.')
-```
-# Add other arguments as needed...
 
+# Add other arguments as needed...
 
 ```
 **Implement:**
