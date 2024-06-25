@@ -36,7 +36,7 @@ This is some of source code for **scMFC: High-order Topology for Deep Single-cel
 ```
 **Implement:**
 ```python
-python run_scEGG.py
+python run_scMFC.py
 ```
 
 
