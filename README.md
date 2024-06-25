@@ -1,6 +1,6 @@
 # scMFC
 A deep single-cell multi-view fuzzy clustering framework
-![Franework](https://github.com/DayuHuu/scEMC/blob/master/scEMC.png)
+![Framework](https://github.com/DayuHuu/scMFC/blob/master/scMFC.png)
 
 
 
