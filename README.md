@@ -1,12 +1,11 @@
 # scMFC
 A deep single-cell multi-view fuzzy clustering framework
-![Franework](https://github.com/DayuHuu/scMFC/blob/master/scMFC_Framework.pdf)
+![Framework](https://github.com/DayuHuu/scMFC/blob/master/scMFC_Framework.pdf)
 **Description:**
 
-scEGG is a deep clustering framework designed for single-cell analysis. It integrates cell and exogenous gene features simultaneously, aligning and fusing them during clustering to generate a more discriminative representation.
+scMFC is a deep clustering framework designed for single-cell analysis. It consists of three modules. The first module involves high-order neighborhood enhancement. Initially, we construct the 1-order neighborhood relationship among cells and then conduct random walks on it to generate a high-order enhancement for each cell view, effectively addressing the issue of underutilization of existing neighborhood information. The second module focuses on cross-view information aggregation. We employ a global structure relationship aggregator to dynamically allocate embedding weights across different views, thus effectively addressing the information differences between them. The third module, the Deep Fuzzy Clustering module, employs a deep fully connected network to estimate the actual cluster assignments, which is trained through minimizing a combination of reconstruction loss and clustering loss. Experiments on three real-world single-cell multi-view datasets have demonstrated the stability and superiority of our method. Our contributions are summarized as follows:
 
 **Requirements:**
-
 - Python==3.7.0
 - Pandas==1.1.5
 - Torch==1.13.1
@@ -16,19 +15,15 @@ scEGG is a deep clustering framework designed for single-cell analysis. It integ
 
 **Datasets:**
 
-- Darmanis: [PubMed](https://pubmed.ncbi.nlm.nih.gov/26060301/)
-- Bjorklund: [GSE70580](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE70580)
-- Sun: [GSE128066](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE128066)
-- Marques: [PubMed](https://pubmed.ncbi.nlm.nih.gov/30078729/)
-- Zeisel: [PubMed](https://pubmed.ncbi.nlm.nih.gov/25700174/)
-- Fink: [PubMed](https://pubmed.ncbi.nlm.nih.gov/35914526/)
+- Refer to the dataset file
 
 **Examples:**
 
 ```python
-parser.add_argument('--dataset_str', default='Bjorklund', type=str, help='name of dataset')
-parser.add_argument('--n_clusters', default=4, type=int, help='expected number of clusters')
-
+    parser = argparse.ArgumentParser(description='Train neural network models on specified dataset.')
+    parser.add_argument('--dataset', default='BMNC',type=str, required=False, help='Dataset to use, default is BMNC.')
+    parser.add_argument('--batch_size', default=2048, type=int, help='Batch size for training.')
+```
 # Add other arguments as needed...
 
 
