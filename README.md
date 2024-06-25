@@ -6,7 +6,7 @@ A deep single-cell multi-view fuzzy clustering framework
 
 **Description:**
 
-This is some of source code for **scMFC: High-order Topology for Deep Single-cell Multi-view Fuzzy Clustering.** The first module involves high-order neighborhood enhancement. Initially, we construct the 1-order neighborhood relationship among cells and then conduct random walks on it to generate a high-order enhancement for each cell view, effectively addressing the issue of underutilization of existing neighborhood information. The second module focuses on cross-view information aggregation. We employ a global structure relationship aggregator to dynamically allocate embedding weights across different views, thus effectively addressing the information differences between them. The third module, the Deep Fuzzy Clustering module, employs a deep fully connected network to estimate the actual cluster assignments, which is trained through minimizing a combination of reconstruction loss and clustering loss. Experiments on three real-world single-cell multi-view datasets have demonstrated the stability and superiority of our method.
+This is some of source code for **scMFC: High-order Topology for Deep Single-cell Multi-view Fuzzy Clustering.** Initially, we construct the 1-order neighborhood relationship among cells and then conduct random walks on it to generate a high-order enhancement for each cell view, effectively addressing the issue of underutilization of existing neighborhood information. The second module focuses on cross-view information aggregation. We employ a global structure relationship aggregator to dynamically allocate embedding weights across different views, thus effectively addressing the information differences between them. The third module, the Deep Fuzzy Clustering module, employs a deep fully connected network to estimate the actual cluster assignments, which is trained through minimizing a combination of reconstruction loss and clustering loss. Experiments on three real-world single-cell multi-view datasets have demonstrated the stability and superiority of our method.
 
 **Requirements:**
 - Python==3.7.0
@@ -18,7 +18,11 @@ This is some of source code for **scMFC: High-order Topology for Deep Single-cel
 
 **Datasets:**
 
-- Refer to the data file
+- Please refer to the data file
+
+**Node2vec**
+
+- Please refer to the official implementation of node2vec: **https://github.com/aditya-grover/node2vec**
 
 **Examples:**
 
