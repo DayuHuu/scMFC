@@ -9,7 +9,7 @@ from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 # Local imports
-import load_data as loader
+import alldata as loader
 from datasets import TrainDataset
 from network import Network
 from Nmetrics import evaluate
@@ -20,7 +20,8 @@ from utils import (
     unsupervised_clustering_step,
     train,
     validate,
-    extract_features
+    extract_features,
+    load_data
 )
 
 # Configuration
@@ -218,7 +219,7 @@ def run_experiment(dataset_key, data_para):
     args = get_args(data_para)
 
     # Data Loading
-    X, Y = loader.load_data(args.dataset, str(DATA_DIR) + '/')
+    X, Y = load_data(args.dataset, str(DATA_DIR) + '/')
     y_true = Y[0].copy()
     dataset = TrainDataset(X, y_true)
     train_loader = create_data_loader(datasets=dataset, batch_size=args.batch_size, init=True)
