@@ -1,7 +1,6 @@
 import torch
 from torch.utils.data.sampler import SequentialSampler, RandomSampler
 
-
 class TrainDataset(torch.utils.data.Dataset):
     def __init__(self, X_list, Y_list):
         self.X_list = X_list
@@ -16,14 +15,11 @@ class TrainDataset(torch.utils.data.Dataset):
             current_x_list.append(current_x)
         current_y = self.Y_list[index]
         current_y_list.append(current_y)
-        # X_list1 = self.X_list
-        # Y_list1 = self.Y_list
         return current_x_list, current_y_list
 
     def __len__(self):
         # return the total size of data
         return self.X_list[0].shape[0]
-
 
 class Data_Sampler(object):
     """Custom Sampler is required. This sampler prepares batch by passing list of
@@ -54,5 +50,3 @@ class Data_Sampler(object):
             return len(self.sampler) // self.batch_size
         else:
             return (len(self.sampler) + self.batch_size - 1) // self.batch_size
-
-
