@@ -3,7 +3,6 @@ import random
 import torch.nn as nn
 import faiss
 import mkl
-import seed_set
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 from network import FCMNet
@@ -312,7 +311,7 @@ def measure_cluster(y_pred, y_true):
     return acc, nmi, pur, ari
 
 def RunKmeans(X, y, K, cv=5):
-    seed = seed_set.seed
+    seed = 1
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -344,7 +343,7 @@ def load_data(dataset, path):
         ######
         X.append(std_view)
         Y.append(Label)
-    seed = seed_set.seed
+    seed = 1
     np.random.seed(seed)
     size = len(Y[0])
     view_num = len(X)
