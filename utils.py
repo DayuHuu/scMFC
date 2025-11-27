@@ -3,6 +3,7 @@ import random
 import torch.nn as nn
 import faiss
 import mkl
+import seed_set
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 from network import FCMNet
@@ -10,7 +11,11 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import normalized_mutual_info_score, confusion_matrix, adjusted_rand_score
 from sklearn.preprocessing import MinMaxScaler
 import h5py
+import seaborn as sns
 import numpy as np
+import pandas as pd
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 mkl.get_max_threads()
@@ -21,17 +26,18 @@ def accuracy(output, target, topk=(1,)):
     with torch.no_grad():
         maxk = max(topk)
         batch_size = target.size(0)
+
         _, pred = output.topk(maxk, 1, True, True)
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
+
         res = []
         for k in topk:
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
 
-
-def  train_kmeans(x, num_clusters=10, num_gpus=1):
+def train_kmeans(x, num_clusters=10, num_gpus=1):
     """
     Runs k-means clustering on one or several GPUs
     """
@@ -156,7 +162,7 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def T_student( u, u_mean, ncl):
+def T_student(u, u_mean, ncl):
     s = torch.pow(1 + torch.pow(u.unsqueeze(1) - u_mean, 2), -1)
     q = torch.sum(s, dim=2)
     sum1 = torch.sum(q, dim=1)
@@ -168,7 +174,7 @@ def c_means_cost(u, u_mean, p):
     b = torch.mul(a, p.unsqueeze(-1))
     return torch.sum(b)
 
-def FCM_Net_train(epoch_f,model,m,u,ncl):
+def FCM_Net_train(epoch_f, model, m, u, ncl):
     for param in model.parameters():
         param.requires_grad = True
     optimizer = torch.optim.Adam(model.parameters())
@@ -183,7 +189,7 @@ def FCM_Net_train(epoch_f,model,m,u,ncl):
         optimizer.step()
     return model
 
-def train_unsupervised(train_loader, model, optimizer, epoch, max_steps, device, tag='unsupervised', verbose=1, num_clusters=16,t1=0.5):
+def train_unsupervised(train_loader, model, optimizer, epoch, max_steps, device, tag='unsupervised', verbose=1, num_clusters=16, t1=0.5):
     losses = AverageMeter()
 
     model.train()
@@ -198,10 +204,10 @@ def train_unsupervised(train_loader, model, optimizer, epoch, max_steps, device,
         u = model.test_commonZ(xs)
         u_mean = train_kmeans(u.detach().cpu().numpy(), num_clusters, num_gpus=1)
         u_mean = torch.tensor(u_mean).cuda()
-        q = T_student(u, u_mean,num_clusters)
-        FCM_Net = FCMNet(ncl=num_clusters).cuda()
-        FCM_Net = FCM_Net_train(10,FCM_Net,1.5,u.detach(),num_clusters)
-        p = FCM_Net(u)
+        q = T_student(u, u_mean, num_clusters)
+        FCM_Net_inst = FCMNet(ncl=num_clusters).cuda()
+        FCM_Net_inst = FCM_Net_train(10, FCM_Net_inst, 1.5, u.detach(), num_clusters)
+        p = FCM_Net_inst(u)
         loss2 = nn.KLDivLoss()(q.log(), p)
         loss = 2*(1-t1)*loss1 + 2*(t1)*loss2
         losses.update(loss.item(), xs[0].size(0))
@@ -237,13 +243,16 @@ def train(train_loader, model, optimizer, epoch, max_steps, device, tag='train',
 
         target = y[0].to(device)
         target = target.to(torch.int64)
+        # compute output
         outputs = model(Xs)
         loss = model.get_loss(Xs, target)
 
+        # measure accuracy and record loss
         prec1 = accuracy(outputs, target, topk=(1,))[0]  # returns tensors!
         losses.update(loss.item(), Xs[0].size(0))
         acc.update(prec1.item(), Xs[0].size(0))
 
+        # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -267,6 +276,7 @@ def validate(data_loader, model, labels_holder, n_clusters, device):
     commonZ = extract_features(data_loader, model, device)
     acc, nmi, pur, ari = RunKmeans(commonZ, labels_holder['labels_gt'], K=n_clusters, cv=1)
     return acc, nmi, pur, ari
+
 def clustering_accuracy(y_true, y_pred):
     """
     Calculate clustering accuracy. Require scikit-learn installed
@@ -289,6 +299,7 @@ def clustering_accuracy(y_true, y_pred):
     ind = np.asarray(ind)
     ind = np.transpose(ind)
     return sum([w[i, j] for i, j in ind]) * 1.0 / y_pred.size
+
 def measure_cluster(y_pred, y_true):
     acc = clustering_accuracy(y_true, y_pred)
     nmi = normalized_mutual_info_score(y_true, y_pred, average_method='geometric')
@@ -301,7 +312,7 @@ def measure_cluster(y_pred, y_true):
     return acc, nmi, pur, ari
 
 def RunKmeans(X, y, K, cv=5):
-    seed = 1
+    seed = seed_set.seed
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -316,24 +327,29 @@ def RunKmeans(X, y, K, cv=5):
     return results
 
 
-def load_data(dataset,path):
-    data = h5py.File(path + dataset + ".mat")
+def load_data(dataset, path):
+    data = h5py.File(path + dataset[1] + ".mat", 'r')
     X = []
     Y = []
     Label = np.array(data['Y']).T
     Label = Label.reshape(Label.shape[0])
     mm = MinMaxScaler()
     for i in range(data['X'].shape[1]):
+        # Depending on h5py version and file structure, access might vary.
+        # Ensure references are handled correctly.
         diff_view = data[data['X'][0, i]]
         diff_view = np.array(diff_view, dtype=np.float32).T
+        ###### Normalize features ######
         std_view = mm.fit_transform(diff_view)
+        ######
         X.append(std_view)
         Y.append(Label)
-    np.random.seed(1)
+    seed = seed_set.seed
+    np.random.seed(seed)
     size = len(Y[0])
     view_num = len(X)
 
-    ##小trick
+    ## Shuffling index
     index = [i for i in range(size)]
     np.random.shuffle(index)
     for v in range(view_num):
@@ -344,5 +360,4 @@ def load_data(dataset,path):
         X[v] = torch.from_numpy(X[v])
 
     return X, Y
-
 
