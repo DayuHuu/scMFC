@@ -14,7 +14,6 @@ class BaseNet(nn.Module):
         def init_fun(m):
             classname = m.__class__.__name__
             if (classname.find('Conv') == 0 or classname.find('Linear') == 0) and hasattr(m, 'weight'):
-                # print m.__class__.__name__
                 if init_type == 'gaussian':
                     init.normal_(m.weight.data, 0.0, 0.02)
                 elif init_type == 'xavier':
@@ -34,7 +33,7 @@ class BaseNet(nn.Module):
 
 
 class FCMNet(nn.Module):
-    def __init__(self,ncl = 16):
+    def __init__(self, ncl=16):
         super(FCMNet, self).__init__()
         self.ncl = ncl
 
@@ -55,9 +54,8 @@ class FCMNet(nn.Module):
 
 class Network(BaseNet):
 
-    def __init__(self, input_A, input_B, nz,K,CVFN=1):
+    def __init__(self, input_A, input_B, nz, K, CVFN=1):
         super().__init__()
-        # self.FCM_Net = FCM_Net
         self.input_A = input_A
         self.input_B = input_B
         self.K = K
@@ -149,10 +147,11 @@ class Network(BaseNet):
         x2 = self.encoder2(x2)
 
         latent = self.extract_layers(torch.cat((x1, x2), 1))
+        # out: (batch size, length, d_model)
 
         return latent
 
-    def get_cls_optimizer(self,lr=1e-3):
+    def get_cls_optimizer(self, lr=1e-3):
         self.cls_optimizer = torch.optim.SGD(chain(self.encoder1.parameters(), self.encoder2.parameters(),
                                                    self.extract_layers.parameters(), self.cls_layer.parameters()),
                                              lr=lr,
@@ -160,12 +159,10 @@ class Network(BaseNet):
                                              weight_decay=5e-4)
         return self.cls_optimizer
 
-    def get_recon_optimizer(self,lr=1e-3):
+    def get_recon_optimizer(self, lr=1e-3):
         self.recon_optimizer = torch.optim.SGD(self.parameters(),
                                                lr=lr,
                                                momentum=0.9,
                                                weight_decay=5e-4,
                                                )
         return self.recon_optimizer
-
-
