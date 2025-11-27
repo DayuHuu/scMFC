@@ -86,6 +86,7 @@ python run_scMFC.py
 ```
 
 -----
+
 ## 📧 Contact
 
 If you have any questions about the code or the paper, please feel free to contact:
