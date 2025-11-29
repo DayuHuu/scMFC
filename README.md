@@ -36,7 +36,7 @@ Please ensure your environment meets the following dependencies:
 * **Scikit-learn** == 0.22.2
 
 ### External Dependencies
-This project utilizes **Node2vec** for graph embedding. Please refer to the official implementation:
+This project utilizes **Node2vec** for high-order graph embedding. Please refer to the official implementation:
 * [Node2vec GitHub Repository](https://github.com/aditya-grover/node2vec)
 
 ### Installation
